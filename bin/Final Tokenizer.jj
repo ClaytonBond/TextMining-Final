@@ -1,0 +1,75 @@
+
+options
+{
+  static = false;
+}
+
+PARSER_BEGIN(HTMLToken)
+import java.io.*;
+import java.util.ArrayList;
+
+public class HTMLToken
+{
+  
+  public static ArrayList<String> cleanRecords(String filePath) throws IOException {
+  		BufferedReader br = new BufferedReader(new FileReader(filePath));
+		HTMLToken u = new HTMLToken(br);
+		ArrayList<String> list = new ArrayList<String>();
+
+		Token t;
+		
+		if(u == null) {
+			u = new HTMLToken(br);
+		}
+		else {
+			u.ReInit(br);
+		}
+		
+		t = u.getNextToken();
+		
+		while ( t.kind != HTMLTokenConstants.EOF ) {
+			String kind = HTMLToken.tokenImage[t.kind];
+			
+			list.add(t.image.toLowerCase());
+			
+			
+			t = u.getNextToken();
+		}
+		
+		br.close();
+		return list;
+  }
+}
+
+PARSER_END(HTMLToken)
+
+TOKEN : {
+
+//	< EMAIL 			: (["a"-"z","A"-"Z","0"-"9"])+ ((["-", "_"])? (["a"-"z","A"-"Z","0"-"9"])+)? "@"(["a"-"z","A"-"Z","0"-"9"])+ "."(["a"-"z","A"-"Z","0"-"9"])+ >
+//|	< DOMAIN		: (["a"-"z","A"-"Z","0"-"9"])+ "."(["a"-"z","A"-"Z"])+ >
+//|	< PHONE 		: ("1")? (("(")? (["0"-"9"]){3} ([" ", ".", ",", "-", ")"])*){2} (["0"-"9"]){4} >
+//|	< PRICE 			: "$" ((["0"-"9"])+ ((","|".")? (["0"-"9"]))*)+ >
+	< WORD    		: (["a"-"z","A"-"Z"])+ (("\'") (["a"-"z","A"-"Z"])+)? > 
+
+
+}
+
+SKIP :
+{
+ 	< WHITESPACE  	: ( ["\r", " ", "\t"] )+ >
+|	< CLOSETAG  			: "</" (["a"-"z"])+ ">"  >
+|	< ANY     					: ~["a"-"z","A"-"Z","0"-"9"] > 
+|	< HTML   				: "<" (["a"-"z"])+ ">"  >
+|	< META					: "<meta" 	(~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< HTMLTAG				: "<html" 	(~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< TABLE					: "<table" 	(~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< LINK						: "<link" 	(~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< SCRIPT				: "<script" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< DIV						: "<" ("/")? "div" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|	< STYLE					: "<style" ((~[])*)+ "</style>" >
+|	< BR						: "<b" (~[]){0,2}">" >
+|	< IMBEDDED			: "<a" (~[">"])+ "\"" (["\r", " ", "\t"])* ">" >
+|	< IMAGE					: "<IMG" (~[">"])* "alt" >
+|	< NUMBER 				: ((["0"-"9"])+ ((","|".")? (["0"-"9"]))*)+ >
+| 	< UNICODE				: ~[] > 
+}
